@@ -270,12 +270,12 @@ def paginate_results(results, page, limit):
 
     return paginated_results, paging_info
 
-@app.route('/filter_stocks', methods=['GET'])
-def filter_stocks():
+@app.route('/stocks', methods=['GET'])
+def stocks():
     group = request.args.get('group', 'VN30')
     sector_name = request.args.get('sector_name')
     check_period_hours = int(request.args.get('check_period_hours', 24))
-    signals = request.args.getlist('signals')
+    signals = request.args.getlist('signal')
 
     stock = Vnstock().stock(source='TCBS')
     stock_info = StockInfo(stock)
