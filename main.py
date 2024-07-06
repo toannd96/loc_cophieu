@@ -87,6 +87,34 @@ class StockAnalysis:
         self.data[f'ma{window}_below'] = self.data['close'] < ma
         return self
 
+    # Tính toán chỉ báo RSI
+    def calculate_rsi(self, window=14):
+        rsi = ta.rsi(self.data['close'], length=window)
+        self.data = pd.concat([self.data, rsi.rename('rsi')], axis=1)
+        return self
+
+    # RSI >= 70
+    def identify_rsi_overbought(self):
+        self.data['rsi_overbought'] = self.data['rsi'] >= 70
+        return self
+
+    # RSI <= 30
+    def identify_rsi_oversold(self):
+        self.data['rsi_oversold'] = self.data['rsi'] <= 30
+        return self
+
+    # Giá vượt đỉnh theo khoảng thời gian (window)
+    def identify_high_breakout(self, window):
+        self.data[f'price{window}_high'] = self.data['high'].rolling(window=window).max()
+        self.data[f'price{window}_high_breakout'] = self.data['close'] > self.data[f'price{window}_high'].shift(1)
+        return self
+
+    # Giá thủng đáy theo khoảng thời gian (window)
+    def identify_low_breakout(self, window):
+        self.data[f'price{window}_low'] = self.data['low'].rolling(window=window).min()
+        self.data[f'price{window}_low_breakout'] = self.data['close'] < self.data[f'price{window}_low'].shift(1)
+        return self
+
 # Lấy thông tin về mã chứng khoán
 class StockInfo:
     def __init__(self, stock):
@@ -181,8 +209,37 @@ def process_bb_signals(analysis, signal, check_period_hours, recent_signals):
     recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
     return recent_signals
 
+def process_rsi_signals(analysis, signal, check_period_hours, recent_signals):
+    analysis.calculate_rsi()
+    action = ExtractSignal.extract_action('rsi', signal)
+
+    if action == 'overbought':
+        analysis.identify_rsi_overbought()
+    if action == 'oversold':
+        analysis.identify_rsi_oversold()
+
+    column_name = f'rsi_{action}'
+    time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
+    recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
+    return recent_signals
+
+def process_price_signals(analysis, signal, check_period_hours, recent_signals):
+    window = ExtractSignal.extract_window('price', signal)
+    action = ExtractSignal.extract_action('price', signal)
+
+    if action == 'high_breakout':
+        analysis.identify_high_breakout(window)
+    if action == 'low_breakout':
+        analysis.identify_low_breakout(window)
+
+    column_name = f'price{window}_{action}'
+    time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
+    recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
+    return recent_signals
+
 def process_stock_data(stock, symbols, industry_symbols, check_period_hours, min_data_length, signals):
     result = []
+    rsi_signals = ['rsi_overbought', 'rsi_oversold']
     macd_signals = ['macd_cross_up', 'macd_cross_down']
     bb_signals = ['bb_upper', 'bb_lower', 'bb_breakout_upper', 'bb_breakout_lower']
     ma_signals = [
@@ -192,6 +249,12 @@ def process_stock_data(stock, symbols, industry_symbols, check_period_hours, min
         'ma50_cross_up', 'ma50_cross_down', 'ma50_above', 'ma50_below',
         'ma100_cross_up', 'ma100_cross_down', 'ma100_above', 'ma100_below',
         'ma200_cross_up', 'ma200_cross_down', 'ma200_above', 'ma200_below',
+    ]
+    price_signals = [
+        'price5_high_breakout', 'price5_low_breakout',
+        'price21_high_breakout', 'price21_low_breakout',
+        'price63_high_breakout', 'price63_low_breakout',
+        'price126_high_breakout', 'price126_low_breakout',
     ]
 
     end_date = datetime.now()
@@ -214,6 +277,10 @@ def process_stock_data(stock, symbols, industry_symbols, check_period_hours, min
                     recent_signals = process_macd_signals(analysis, signal, check_period_hours, recent_signals)
                 if signal in bb_signals:
                     recent_signals = process_bb_signals(analysis, signal, check_period_hours, recent_signals)
+                if signal in rsi_signals:
+                    recent_signals = process_rsi_signals(analysis, signal, check_period_hours, recent_signals)
+                if signal in price_signals:
+                    recent_signals = process_price_signals(analysis, signal, check_period_hours, recent_signals)
 
             stock_info = StockInfo(stock)
             company_name = stock_info.get_company_name(industry_symbols, symbol)
@@ -339,4 +406,3 @@ if __name__ == '__main__':
 #  }
 
 # HOSE, VN30, VNMidCap, VNSmallCap, VNAllShare, VN100, ETF, HNX, HNX30, HNXCon, HNXFin, HNXLCap, HNXMSCap, HNXMan, UPCOM, FU_INDEX
-
