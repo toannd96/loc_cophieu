@@ -1,4 +1,4 @@
-### loccophieu - bộ lọc cổ phiếu theo tín hiệu PTKT
+![](https://github.com/toannd96/loc_cophieu/blob/master/static/img/loc_cp.png)
 
 - Request API:
 ```
