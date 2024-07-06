@@ -1,0 +1,52 @@
+/* Styles for custom stock filter interface */
+
+/* Center align headings */
+h4 {
+    text-align: center;
+}
+
+/* Margin for the container */
+.container {
+    margin-top: 30px;
+}
+
+/* Adjust margin for rows */
+.row {
+    margin-bottom: 10px;
+}
+
+/* Adjust padding for columns */
+.col-md-6, .col-md-5, .col-md-1 {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+/* Style for selected signals list */
+#selectedSignals {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+/* Style for search button */
+#searchButton {
+    width: 150px; /* Adjust the width as needed */
+    margin-top: 20px;
+}
+
+/* Style for results table */
+#resultsTable {
+    margin-top: 20px;
+}
+
+/* Adjust input and button alignment */
+#filterHours, #addSignalButton {
+    margin-top: 30px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .col-md-6, .col-md-5, .col-md-1 {
+        padding-right: 0;
+        padding-left: 0;
+    }
+}

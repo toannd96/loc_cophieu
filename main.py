@@ -2,7 +2,7 @@ import pandas as pd
 import pandas_ta as ta
 import json
 import re
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from vnstock3 import Vnstock
 from datetime import datetime, timedelta
 
@@ -337,11 +337,14 @@ def paginate_results(results, page, limit):
 
     return paginated_results, paging_info
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/stocks', methods=['GET'])
 def stocks():
     group = request.args.get('group', 'VN30')
     sector_name = request.args.get('sector_name')
-    check_period_hours = int(request.args.get('check_period_hours', 24))
     signals = request.args.getlist('signal')
 
     stock = Vnstock().stock(source='TCBS')
@@ -352,6 +355,7 @@ def stocks():
     symbols_sector = industry_symbols[industry_symbols['icb_name3'] == sector_name] if sector_name else industry_symbols
     symbols = stock_info.get_filtered_symbols(symbols_group, symbols_sector)
 
+    check_period_hours = 24
     min_data_length = 200
     all_results = process_stock_data(stock, symbols, industry_symbols, check_period_hours, min_data_length, signals)
 
