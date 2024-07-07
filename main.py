@@ -125,10 +125,10 @@ class StockInfo:
         return self.stock.listing.symbols_by_group(group)
 
     # Danh sách mã chứng khoán theo ngành
-    def get_symbols_by_sector(self, sector_name=None):
+    def get_symbols_by_industry(self, industry=None):
         industry_symbols = self.stock.listing.symbols_by_industries()
-        if sector_name:
-            return industry_symbols[industry_symbols['icb_name3'] == sector_name]
+        if industry:
+            return industry_symbols[industry_symbols['icb_name3'] == industry]
         else:
             return industry_symbols
 
@@ -337,22 +337,84 @@ def paginate_results(results, page, limit):
 
     return paginated_results, paging_info
 
+# Route để hiển thị trang chính
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# Route để lấy dữ liệu ngành
+@app.route('/industries', methods=['GET'])
+def get_industries():
+    industries = [
+        'Bia và đồ uống', 'Bán lẻ', 'Bảo hiểm nhân thọ', 'Bảo hiểm phi nhân thọ',
+        'Bất động sản', 'Công nghiệp nặng', 'Du lịch & Giải trí', 'Dược phẩm',
+        'Dịch vụ tài chính', 'Hàng cá nhân', 'Hàng công nghiệp', 'Hàng gia dụng',
+        'Hàng hóa giải trí', 'Hóa chất', 'Khai khoáng', 'Kim loại',
+        'Lâm nghiệp và Giấy', 'Ngân hàng', 'Nước & Khí đốt',
+        'Phân phối thực phẩm & dược phẩm', 'Phần mềm & Dịch vụ Máy tính',
+        'Sản xuất & Phân phối Điện', 'Sản xuất Dầu khí', 'Sản xuất thực phẩm',
+        'Thiết bị và Dịch vụ Y tế', 'Thiết bị và Phần cứng',
+        'Thiết bị, Dịch vụ và Phân phối Dầu khí', 'Thuốc lá', 'Truyền thông',
+        'Tư vấn & Hỗ trợ Kinh doanh', 'Viễn thông cố định',
+        'Viễn thông di động', 'Vận tải', 'Xây dựng và Vật liệu',
+        'Ô tô và phụ tùng', 'Điện tử & Thiết bị điện'
+    ]
+    return jsonify(industries)
+
+# Route để lấy dữ liệu sàn
+@app.route('/groups', methods=['GET'])
+def get_groups():
+    groups = [
+        'HOSE', 'VN30', 'VNMidCap', 'VNSmallCap', 'VNAllShare', 'VN100',
+        'ETF', 'HNX', 'HNX30', 'HNXCon', 'HNXFin', 'HNXLCap', 'HNXMSCap',
+        'HNXMan', 'UPCOM', 'FU_INDEX'
+    ]
+    return jsonify(groups)
+
+# Route để lấy dữ liệu loại tín hiệu
+@app.route('/signal_categories', methods=['GET'])
+def get_signal_categories():
+    categories = ['Bollinger Band', 'MACD', 'MA', 'RSI', 'Giá']
+    return jsonify(categories)
+
+# Route để lấy tên các tín hiệu dựa trên loại tín hiệu đã chọn
+@app.route('/signals/<category>', methods=['GET'])
+def get_signals(category):
+    signals_map = {
+        'Bollinger Band': ['bb_upper', 'bb_lower', 'bb_breakout_upper', 'bb_breakout_lower'],
+        'MACD': ['macd_cross_up', 'macd_cross_down'],
+        'MA': [
+            'ma5_cross_up', 'ma5_cross_down', 'ma5_above', 'ma5_below',
+            'ma10_cross_up', 'ma10_cross_down', 'ma10_above', 'ma10_below',
+            'ma20_cross_up', 'ma20_cross_down', 'ma20_above', 'ma20_below',
+            'ma50_cross_up', 'ma50_cross_down', 'ma50_above', 'ma50_below',
+            'ma100_cross_up', 'ma100_cross_down', 'ma100_above', 'ma100_below',
+            'ma200_cross_up', 'ma200_cross_down', 'ma200_above', 'ma200_below',
+        ], 
+        'RSI': ['rsi_overbought', 'rsi_oversold'],
+        'Giá': [
+            'price5_high_breakout', 'price5_low_breakout',
+            'price21_high_breakout', 'price21_low_breakout',
+            'price63_high_breakout', 'price63_low_breakout',
+            'price126_high_breakout', 'price126_low_breakout'
+        ]
+    }
+    signals = signals_map.get(category, [])
+    return jsonify(signals)
+
+# Route để lọc cổ phiếu dựa trên các tín hiệu đã chọn
 @app.route('/stocks', methods=['GET'])
 def stocks():
     group = request.args.get('group', 'VN30')
-    sector_name = request.args.get('sector_name')
+    industry = request.args.get('industry')
     signals = request.args.getlist('signal')
 
     stock = Vnstock().stock(source='TCBS')
     stock_info = StockInfo(stock)
 
     symbols_group = stock_info.get_symbols_by_group(group)
-    industry_symbols = stock_info.get_symbols_by_sector(sector_name)
-    symbols_sector = industry_symbols[industry_symbols['icb_name3'] == sector_name] if sector_name else industry_symbols
+    industry_symbols = stock_info.get_symbols_by_group(industry)
+    symbols_sector = industry_symbols[industry_symbols['icb_name3'] == industry] if industry else industry_symbols
     symbols = stock_info.get_filtered_symbols(symbols_group, symbols_sector)
 
     check_period_hours = 24

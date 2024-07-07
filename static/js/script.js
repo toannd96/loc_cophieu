@@ -1,58 +1,107 @@
 $(document).ready(function() {
     // Function to populate industry dropdown
     function populateIndustryDropdown() {
-        var industries = [
-            'Bia và đồ uống', 'Bán lẻ', 'Bảo hiểm nhân thọ', 'Bảo hiểm phi nhân thọ',
-            'Bất động sản', 'Công nghiệp nặng', 'Du lịch & Giải trí', 'Dược phẩm',
-            'Dịch vụ tài chính', 'Hàng cá nhân', 'Hàng công nghiệp', 'Hàng gia dụng',
-            'Hàng hóa giải trí', 'Hóa chất', 'Khai khoáng', 'Kim loại',
-            'Lâm nghiệp và Giấy', 'Ngân hàng', 'Nước & Khí đốt',
-            'Phân phối thực phẩm & dược phẩm', 'Phần mềm & Dịch vụ Máy tính',
-            'Sản xuất & Phân phối Điện', 'Sản xuất Dầu khí', 'Sản xuất thực phẩm',
-            'Thiết bị và Dịch vụ Y tế', 'Thiết bị và Phần cứng',
-            'Thiết bị, Dịch vụ và Phân phối Dầu khí', 'Thuốc lá', 'Truyền thông',
-            'Tư vấn & Hỗ trợ Kinh doanh', 'Viễn thông cố định',
-            'Viễn thông di động', 'Vận tải', 'Xây dựng và Vật liệu',
-            'Ô tô và phụ tùng', 'Điện tử & Thiết bị điện'
-        ];
-
-        var options = industries.map(industry => `<option>${industry}</option>`);
-        $('#industrySelect').html(options.join(''));
+        $.get('/industries', function(data) {
+            var options = data.map(function(industry) {
+                return `<option>${industry}</option>`;
+            });
+            $('#industrySelect').html(options.join(''));
+        });
     }
 
-    // Function to populate exchange dropdown
-    function populateExchangeDropdown() {
-        var exchanges = [
-            'HOSE', 'VN30', 'VNMidCap', 'VNSmallCap', 'VNAllShare', 'VN100',
-            'ETF', 'HNX', 'HNX30', 'HNXCon', 'HNXFin', 'HNXLCap', 'HNXMSCap',
-            'HNXMan', 'UPCOM', 'FU_INDEX'
-        ];
-
-        var options = exchanges.map(exchange => `<option>${exchange}</option>`);
-        $('#exchangeSelect').html(options.join(''));
+    // Function to populate group dropdown
+    function populateGroupDropdown() {
+        $.get('/groups', function(data) {
+            var options = data.map(function(group) {
+                return `<option>${group}</option>`;
+            });
+            $('#groupSelect').html(options.join(''));
+        });
     }
 
     // Function to populate signal categories
     function populateSignalCategories() {
-        var categories = [
-            'MACD', 'Bollinger Band', 'RSI'
-        ];
-
-        var options = categories.map(category => `<option>${category}</option>`);
-        $('#signalCategorySelect').html(options.join(''));
+        $.get('/signal_categories', function(data) {
+            var options = data.map(function(category) {
+                return `<option>${category}</option>`;
+            });
+            $('#signalCategorySelect').html(options.join(''));
+            // Trigger change event to populate signals initially based on default category
+            var defaultCategory = $('#signalCategorySelect').val();
+            populateSignals(defaultCategory);
+        });
     }
+
+    var signalMappings = {
+        'ma5_cross_up': 'Giá cắt lên đường MA5',
+        'ma5_cross_down': 'Giá cắt xuống đường MA5',
+
+        'ma5_above': 'Giá nằm trên đường MA5',
+        'ma5_below': 'Giá nằm dưới đường MA5',
+
+        'ma10_cross_up': 'Giá cắt lên đường MA10',
+        'ma10_cross_down': 'Giá cắt xuống đường MA10',
+
+        'ma10_above': 'Giá nằm trên đường MA10',
+        'ma10_below': 'Giá nằm dưới đường MA10',
+
+        'ma20_cross_up': 'Giá cắt lên đường MA20',
+        'ma20_cross_down': 'Giá cắt xuống đường MA20',
+
+        'ma20_above': 'Giá nằm trên đường MA20',
+        'ma20_below': 'Giá nằm dưới đường MA20',
+
+        'ma50_cross_up': 'Giá cắt lên đường MA50',
+        'ma50_cross_down': 'Giá cắt xuống đường MA500',
+
+        'ma50_above': 'Giá nằm trên đường MA50',
+        'ma50_below': 'Giá nằm dưới đường MA50',
+
+        'ma100_cross_up': 'Giá cắt lên đường MA100',
+        'ma100_cross_down': 'Giá cắt xuống đường MA100',
+
+        'ma100_above': 'Giá nằm trên đường MA100',
+        'ma100_below': 'Giá nằm dưới đường MA100',
+
+        'ma200_cross_up': 'Giá cắt lên đường MA200',
+        'ma200_cross_down': 'Giá cắt xuống đường MA200',
+
+        'ma200_above': 'Giá nằm trên đường MA200',
+        'ma200_below': 'Giá nằm dưới đường MA200',
+
+        'macd_cross_up': 'Đường MACD cắt lên đường tín hiệu',
+        'macd_cross_down': 'Đường MACD cắt xuống đường tín hiệu',
+
+        'bb_breakout_upper': 'Giá vượt ra ngoài biên trên',
+        'bb_breakout_lower': 'Giá vượt ra ngoài biên dưới',
+
+        'bb_upper': 'Giá chạm dải biên trên',
+        'bb_lower': 'Giá chạm dải biên dưới',
+
+        'rsi_overbought': 'RSI >= 70',
+        'rsi_oversold': 'RSI <= 30',
+
+        'price5_high_breakout': 'Các mã có giá vượt đỉnh tuần',
+        'price5_low_breakout': 'Các mã có giá thủng đáy tuần',
+
+        'price21_high_breakout': 'Các mã có giá vượt đỉnh tháng',
+        'price21_low_breakout': 'Các mã có giá thủng đáy tháng',
+
+        'price63_high_breakout': 'Các mã có giá vượt đỉnh quý',
+        'price63_low_breakout': 'Các mã có giá thủng đáy quý',
+        
+        'price126_high_breakout': 'Các mã có giá vượt đỉnh 6 tháng',
+        'price126_low_breakout': 'Các mã có giá thủng đáy 6 tháng',
+    };
 
     // Function to populate signals based on selected category
     function populateSignals(category) {
-        var signalsMap = {
-            'MACD': ['Đường MACD cắt lên đường tín hiệu', 'Đường MACD cắt xuống đường tín hiệu'],
-            'Bollinger Band': ['Giá vượt ra ngoài biên trên', 'Giá vượt ra ngoài biên dưới', 'Giá chạm dải biên trên', 'Giá chạm dải biên dưới'],
-            'RSI': ['RSI >= 70', 'RSI <= 30']
-        };
-
-        var signals = signalsMap[category] || [];
-        var options = signals.map(signal => `<option>${signal}</option>`);
-        $('#signalSelect').html(options.join(''));
+        $.get(`/signals/${category}`, function(data) {
+            var options = data.map(function(signal) {
+                return `<option value="${signal}">${signalMappings[signal]}</option>`;
+            });
+            $('#signalSelect').html(options.join(''));
+        });
     }
 
     // Event listener for signal category selection
@@ -65,53 +114,57 @@ $(document).ready(function() {
     $('#addSignalButton').click(function() {
         var selectedSignal = $('#signalSelect').val();
         if (selectedSignal) {
-            var listItem = `<li class="list-group-item">${selectedSignal} <button class="btn btn-sm btn-danger float-right remove-signal">x</button></li>`;
+            var listItem = `<li class="list-group-item">${signalMappings[selectedSignal]} <button class="btn btn-sm btn-danger float-right remove-signal" data-signal="${selectedSignal}">x</button></li>`;
             $('#selectedSignals').append(listItem);
         }
     });
 
     // Event listener for removing selected signal
     $('#selectedSignals').on('click', '.remove-signal', function() {
+        var signalToRemove = $(this).data('signal');
         $(this).parent().remove();
     });
 
     // Event listener for search button click
     $('#searchButton').click(function() {
-        // Replace with actual search logic and results population
-        var results = [
-            {
-                "symbol": "BID",
-                "company_name": "Ngân hàng Thương mại Cổ phần Đầu tư và Phát triển Việt Nam",
-                "industry_name": "Ngân hàng",
-                "close_price": 47.3,
-                "volume": 2668392
+        var industry = $('#industrySelect').val();
+        var group = $('#groupSelect').val();
+        var signal = $('#selectedSignals li').map(function() {
+            return $(this).find('button').data('signal');
+        }).get();
+
+        // Build query string for signals
+        var queryString = $.param({ industry: industry, group: group, signal: signal }, true);
+
+        $.ajax({
+            url: '/stocks',
+            method: 'GET',
+            data: queryString,
+            success: function(response) {
+                var total = response.length;
+                $('#companyCount').text(`Tìm thấy ${total} công ty phù hợp`);
+
+                var rows = response.map(function(result) {
+                    return `
+                        <tr>
+                            <td>${result.symbol}</td>
+                            <td>${result.company_name}</td>
+                            <td>${result.industry_name}</td>
+                            <td>${result.close_price}</td>
+                            <td>${result.volume}</td>
+                        </tr>
+                    `;
+                });
+                $('#resultsTable tbody').html(rows.join(''));
             },
-            {
-                "symbol": "PLX",
-                "company_name": "Tập đoàn Xăng dầu Việt Nam",
-                "industry_name": "Sản xuất Dầu khí",
-                "close_price": 43.9,
-                "volume": 6019356
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
             }
-        ];
-
-        var total = results.length;
-        $('#companyCount').text(`Tìm thấy ${total} công ty phù hợp`);
-
-        var rows = results.map(result => `
-            <tr>
-                <td>${result.symbol}</td>
-                <td>${result.company_name}</td>
-                <td>${result.industry_name}</td>
-                <td>${result.close_price}</td>
-                <td>${result.volume}</td>
-            </tr>
-        `);
-        $('#resultsTable tbody').html(rows.join(''));
+        });
     });
 
     // Initial population on page load
     populateIndustryDropdown();
-    populateExchangeDropdown();
+    populateGroupDropdown();
     populateSignalCategories();
 });
