@@ -133,9 +133,9 @@ class StockInfo:
             return industry_symbols
 
     # Danh sách thuộc nhóm và ngành
-    def get_filtered_symbols(self, symbols_group, symbols_sector):
-        sector_symbols_list = symbols_sector['symbol'].tolist()
-        return list(set(symbols_group) & set(sector_symbols_list))
+    def get_filtered_symbols(self, symbols_group, symbols_industry):
+        symbol_industries = symbols_industry['symbol'].tolist()
+        return list(set(symbols_group) & set(symbol_industries))
 
     def get_company_name(self, industry_symbols, symbol):
         return industry_symbols[industry_symbols['symbol'] == symbol]['organ_name'].values[0]
@@ -237,7 +237,7 @@ def process_price_signals(analysis, signal, check_period_hours, recent_signals):
     recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
     return recent_signals
 
-def process_stock_data(stock, symbols, industry_symbols, check_period_hours, min_data_length, signals):
+def process_stock_data(stock, symbols, symbols_group_industry, check_period_hours, min_data_length, signals):
     result = []
     rsi_signals = ['rsi_overbought', 'rsi_oversold']
     macd_signals = ['macd_cross_up', 'macd_cross_down']
@@ -283,8 +283,8 @@ def process_stock_data(stock, symbols, industry_symbols, check_period_hours, min
                     recent_signals = process_price_signals(analysis, signal, check_period_hours, recent_signals)
 
             stock_info = StockInfo(stock)
-            company_name = stock_info.get_company_name(industry_symbols, symbol)
-            industry_name = stock_info.get_industry_name(industry_symbols, symbol)
+            company_name = stock_info.get_company_name(symbols_group_industry, symbol)
+            industry_name = stock_info.get_industry_name(symbols_group_industry, symbol)
 
             if not recent_signals.empty:
                 last_signal = recent_signals.iloc[-1]
@@ -413,13 +413,13 @@ def stocks():
     stock_info = StockInfo(stock)
 
     symbols_group = stock_info.get_symbols_by_group(group)
-    industry_symbols = stock_info.get_symbols_by_group(industry)
-    symbols_sector = industry_symbols[industry_symbols['icb_name3'] == industry] if industry else industry_symbols
-    symbols = stock_info.get_filtered_symbols(symbols_group, symbols_sector)
+    symbols_group_industry = stock_info.get_symbols_by_industry(industry)
+    symbols_industry = symbols_group_industry[symbols_group_industry['icb_name3'] == industry] if industry else symbols_group_industry
+    symbols = stock_info.get_filtered_symbols(symbols_group, symbols_industry)
 
     check_period_hours = 24
     min_data_length = 200
-    all_results = process_stock_data(stock, symbols, industry_symbols, check_period_hours, min_data_length, signals)
+    all_results = process_stock_data(stock, symbols, symbols_group_industry, check_period_hours, min_data_length, signals)
 
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 100))

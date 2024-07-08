@@ -42,7 +42,7 @@
         </div>
         <div class="row mt-4">
             <div class="col-md-12">
-                <h4>Tín hiệu đã chọn</h4>
+                <h4 id="selectedSignalsHeader">Tín hiệu đã chọn (0)</h4>
                 <ul id="selectedSignals" class="list-group">
                     <!-- Selected signals will be dynamically added here -->
                 </ul>
@@ -57,7 +57,7 @@
         </div>
         <div class="row mt-4 align-items-center">
             <div class="col-md-6 text-left">
-                <p id="companyCount">Tìm thấy 0 công ty phù hợp</p>
+                <p id="companyCount">Tìm thấy <strong>0</strong> công ty phù hợp</p>
             </div>
             <div class="col-md-6 text-right">
                 <button id="searchButton" class="btn btn-success">Lọc cổ phiếu</button>
@@ -80,6 +80,13 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- Spinner -->
+    <div id="loadingSpinner" class="text-center" style="display:none;">
+        <div class="spinner-border text-success" role="status">
+            <span class="sr-only">Loading...</span>
         </div>
     </div>
 

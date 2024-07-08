@@ -110,19 +110,32 @@ $(document).ready(function() {
         populateSignals(selectedCategory);
     });
 
+    // Biến để lưu số lượng tín hiệu đã chọn
+    var selectedSignalsCount = 0;
+
+    // Function để cập nhật số lượng tín hiệu đã chọn
+    function updateSelectedSignalsCount() {
+        $('#selectedSignalsHeader').text(`Tín hiệu đã chọn (${selectedSignalsCount})`);
+    }
+
     // Event listener for adding selected signal
     $('#addSignalButton').click(function() {
         var selectedSignal = $('#signalSelect').val();
         if (selectedSignal) {
             var listItem = `<li class="list-group-item">${signalMappings[selectedSignal]} <button class="btn btn-sm btn-danger float-right remove-signal" data-signal="${selectedSignal}">x</button></li>`;
             $('#selectedSignals').append(listItem);
+            selectedSignalsCount++; // Tăng số lượng tín hiệu đã chọn
+            updateSelectedSignalsCount(); // Cập nhật hiển thị số lượng
         }
     });
+
 
     // Event listener for removing selected signal
     $('#selectedSignals').on('click', '.remove-signal', function() {
         var signalToRemove = $(this).data('signal');
         $(this).parent().remove();
+        selectedSignalsCount--; // Giảm số lượng tín hiệu đã chọn
+        updateSelectedSignalsCount(); // Cập nhật hiển thị số lượng
     });
 
     // Event listener for search button click
@@ -136,15 +149,23 @@ $(document).ready(function() {
         // Build query string for signals
         var queryString = $.param({ industry: industry, group: group, signal: signal }, true);
 
+        // Hiển thị spinner
+        $('#loadingSpinner').show();
+
+        $('#companyCount').html(`Tìm thấy <strong>0</strong> công ty phù hợp`);
+
+        // Xóa hết dữ liệu hiện tại trên bảng
+        $('#resultsTable tbody').empty();
+
         $.ajax({
             url: '/stocks',
             method: 'GET',
             data: queryString,
             success: function(response) {
-                var total = response.length;
-                $('#companyCount').text(`Tìm thấy ${total} công ty phù hợp`);
-
-                var rows = response.map(function(result) {
+                var total = response.paging.total;
+                $('#companyCount').html(`Tìm thấy <strong>${total}</strong> công ty phù hợp`);
+    
+                var rows = response.results.map(function(result) {
                     return `
                         <tr>
                             <td>${result.symbol}</td>
@@ -155,10 +176,17 @@ $(document).ready(function() {
                         </tr>
                     `;
                 });
+                // Thêm dữ liệu mới vào bảng
                 $('#resultsTable tbody').html(rows.join(''));
+
+                // Ẩn spinner
+                $('#loadingSpinner').hide();
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);
+
+                // Ẩn spinner khi có lỗi
+                $('#loadingSpinner').hide();
             }
         });
     });
