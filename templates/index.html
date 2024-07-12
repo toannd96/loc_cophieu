@@ -10,13 +10,13 @@
 <body>
     <div class="container mt-5">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-5 col-sm-12">
                 <h4>Ngành</h4>
                 <select id="industrySelect" class="form-control">
                     <!-- Industry options will be populated dynamically -->
                 </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-7 col-sm-12 mt-3 mt-md-0">
                 <h4>Sàn</h4>
                 <select id="groupSelect" class="form-control">
                     <!-- Group options will be populated dynamically -->
@@ -24,37 +24,54 @@
             </div>
         </div>
         <div class="row mt-4 align-items-end">
-            <div class="col-md-6">
+            <div class="col-md-5 col-sm-12">
                 <h4>Chỉ báo</h4>
                 <select id="signalCategorySelect" class="form-control">
                     <!-- Signal categories will be populated dynamically -->
                 </select>
             </div>
-            <div class="col-md-5">
+            <div class="col-md-2 col-sm-4 mt-3 mt-md-0">
                 <h4>Tín hiệu</h4>
-                <select id="signalSelect" class="form-control">
+                <select id="signalSelect1" class="form-control">
                     <!-- Signals for selected category will be populated dynamically -->
                 </select>
             </div>
-            <div class="col-md-1 text-right">
+            <div class="col-md-2 col-sm-4 mt-3 mt-md-0">
+                <select id="signalSelect2" class="form-control">
+                    <!-- Signals for selected category will be populated dynamically -->
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-4 mt-3 mt-md-0">
+                <select id="signalSelect3" class="form-control">
+                    <!-- Signals for selected category will be populated dynamically -->
+                </select>
+            </div>
+            <div class="col-md-1 col-sm-12 text-right mt-3 mt-md-0">
                 <button id="addSignalButton" class="btn btn-success">Thêm</button>
             </div>
         </div>
         <div class="row mt-4">
-            <div class="col-md-12">
+            <div class="col-12">
                 <h4 id="selectedSignalsHeader">Tín hiệu đã chọn (0)</h4>
                 <ul id="selectedSignals" class="list-group">
                     <!-- Selected signals will be dynamically added here -->
                 </ul>
             </div>
         </div>
+        <hr class="my-4">
         <div class="row mt-4">
-            <div class="col-md-12">
+            <!-- Phần tử chứa chú thích -->
+            <div class="col-12">
+                <div id="footerNote"></div>
                 <p class="text-muted">
-                    Dữ liệu bộ lọc được thống kê từ các tín hiệu kỹ thuật phát sinh trong vòng 24 giờ, tính đến thời điểm giao dịch cuối cùng gần nhất
+                    Dữ liệu được truy xuất từ <a href="https://vnstocks.com/" target="_blank">vnstock</a> - gói phần mềm phân tích thị trường chứng khoán Việt Nam.
+                </p>
+                <p class="text-muted">
+                    Dữ liệu bộ lọc được thống kê từ các tín hiệu kỹ thuật phát sinh trong vòng 24 giờ, tính đến thời điểm giao dịch cuối cùng gần nhất.
                 </p>
             </div>
         </div>
+        <hr class="my-4">
         <div class="row mt-4 align-items-center">
             <div class="col-md-6 text-left">
                 <p id="companyCount">Tìm thấy <strong>0</strong> công ty phù hợp</p>
@@ -64,7 +81,7 @@
             </div>
         </div>
         <div class="row mt-4">
-            <div class="col-md-12">
+            <div class="col-12">
                 <table id="resultsTable" class="table table-bordered">
                     <thead>
                         <tr>

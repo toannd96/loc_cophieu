@@ -25,12 +25,12 @@ class StockAnalysis:
 
     # MACD cắt lên đường tín hiệu
     def identify_macd_cross_up(self):
-        self.data['macd_cross_up'] = (self.data['macd'] > self.data['signal_line']) & (self.data['macd'].shift(1) <= self.data['signal_line'].shift(1))
+        self.data['macd_cross_up_signal'] = (self.data['macd'] > self.data['signal_line']) & (self.data['macd'].shift(1) <= self.data['signal_line'].shift(1))
         return self
 
     # MACD cắt xuống đường tín hiệu
     def identify_macd_cross_down(self):
-        self.data['macd_cross_down'] = (self.data['macd'] < self.data['signal_line']) & (self.data['macd'].shift(1) >= self.data['signal_line'].shift(1))
+        self.data['macd_cross_down_signal'] = (self.data['macd'] < self.data['signal_line']) & (self.data['macd'].shift(1) >= self.data['signal_line'].shift(1))
         return self
 
     # Tính toán chỉ báo Bollinger Band
@@ -40,13 +40,13 @@ class StockAnalysis:
         return self
 
     # Giá chạm dải biên trên dải Bollinger Band
-    def identify_bollinger_upper(self):
-        self.data['bb_upper'] = self.data['close'] >= self.data['BBU_20_2.0']
+    def identify_bollinger_touch_upper(self):
+        self.data['bb_touch_upper'] = self.data['close'] >= self.data['BBU_20_2.0']
         return self
 
     # Giá chạm dải biên dưới dải Bollinger Band
-    def identify_bollinger_lower(self):
-        self.data['bb_lower'] = self.data['close'] <= self.data['BBL_20_2.0']
+    def identify_bollinger_touch_lower(self):
+        self.data['bb_touch_lower'] = self.data['close'] <= self.data['BBL_20_2.0']
         return self
 
     # Giá vượt ra ngoài biên trên dải Bollinger Band
@@ -66,25 +66,25 @@ class StockAnalysis:
     # Giá cắt lên đường MA_N
     def identify_ma_cross_up(self, window):
         ma = self.calculate_ma(window)
-        self.data[f'ma{window}_cross_up'] = (self.data['close'] > ma) & (self.data['close'].shift(1) <= ma.shift(1))
+        self.data[f'ma_cross_up_{window}'] = (self.data['close'] > ma) & (self.data['close'].shift(1) <= ma.shift(1))
         return self
 
     # Giá cắt xuống đường MA_N
     def identify_ma_cross_down(self, window):
         ma = self.calculate_ma(window)
-        self.data[f'ma{window}_cross_down'] = (self.data['close'] < ma) & (self.data['close'].shift(1) >= ma.shift(1))
+        self.data[f'ma_cross_down_{window}'] = (self.data['close'] < ma) & (self.data['close'].shift(1) >= ma.shift(1))
         return self
 
     # Giá nằm trên đường MA_N
     def identify_ma_above(self, window):
         ma = self.calculate_ma(window)
-        self.data[f'ma{window}_above'] = self.data['close'] > ma
+        self.data[f'ma_above_{window}'] = self.data['close'] > ma
         return self
     
     # Giá nằm dưới đường MA_N
     def identify_ma_below(self, window):
         ma = self.calculate_ma(window)
-        self.data[f'ma{window}_below'] = self.data['close'] < ma
+        self.data[f'ma_below_{window}'] = self.data['close'] < ma
         return self
 
     # Tính toán chỉ báo RSI
@@ -93,26 +93,36 @@ class StockAnalysis:
         self.data = pd.concat([self.data, rsi.rename('rsi')], axis=1)
         return self
 
-    # RSI >= 70
-    def identify_rsi_overbought(self):
-        self.data['rsi_overbought'] = self.data['rsi'] >= 70
+    # RSI > 70
+    def identify_rsi_gt_overbought(self):
+        self.data['rsi_gt_overbought'] = self.data['rsi'] > 70
         return self
 
-    # RSI <= 30
-    def identify_rsi_oversold(self):
-        self.data['rsi_oversold'] = self.data['rsi'] <= 30
+    # RSI < 70
+    def identify_rsi_lt_overbought(self):
+        self.data['rsi_lt_overbought'] = self.data['rsi'] < 70
+        return self
+
+    # RSI < 30
+    def identify_rsi_lt_oversold(self):
+        self.data['rsi_lt_oversold'] = self.data['rsi'] < 30
+        return self
+
+    # RSI > 30
+    def identify_rsi_gt_oversold(self):
+        self.data['rsi_gt_oversold'] = self.data['rsi'] > 30
         return self
 
     # Giá vượt đỉnh theo khoảng thời gian (window)
     def identify_high_breakout(self, window):
-        self.data[f'price{window}_high'] = self.data['high'].rolling(window=window).max()
-        self.data[f'price{window}_high_breakout'] = self.data['close'] > self.data[f'price{window}_high'].shift(1)
+        self.data[f'price_high_{window}'] = self.data['high'].rolling(window=window).max()
+        self.data[f'price_high_breakout_{window}'] = self.data['close'] > self.data[f'price_high_{window}'].shift(1)
         return self
 
     # Giá thủng đáy theo khoảng thời gian (window)
     def identify_low_breakout(self, window):
-        self.data[f'price{window}_low'] = self.data['low'].rolling(window=window).min()
-        self.data[f'price{window}_low_breakout'] = self.data['close'] < self.data[f'price{window}_low'].shift(1)
+        self.data[f'price_low_{window}'] = self.data['low'].rolling(window=window).min()
+        self.data[f'price_low_breakout_{window}'] = self.data['close'] < self.data[f'price_low_{window}'].shift(1)
         return self
 
 # Lấy thông tin về mã chứng khoán
@@ -146,21 +156,29 @@ class StockInfo:
 class ExtractSignal:
     @staticmethod
     def extract_window(prefix, signal):
-        match = re.search(fr'{prefix}(\d+)', signal)
+        match = re.search(fr'{prefix}.*_(\d+)$', signal)
         if match:
             return int(match.group(1))
         return None
 
     @staticmethod
     def extract_action(prefix, signal):
-        match = re.search(fr'{prefix}(?:\d+)?_(\w+)', signal)
+        match = re.search(fr'{prefix}_(.*?)(?:_\d+)?$', signal)
+        if match:
+            return match.group(1)
+        return None
+
+    @staticmethod
+    def extract_prefix(signal):
+        match = re.match(r'^([a-z]+)_', signal)
         if match:
             return match.group(1)
         return None
 
 def process_ma_signals(analysis, signal, check_period_hours, recent_signals):
-    window = ExtractSignal.extract_window('ma', signal)
-    action = ExtractSignal.extract_action('ma', signal)
+    prefix = ExtractSignal.extract_prefix(signal)
+    window = ExtractSignal.extract_window(prefix, signal)
+    action = ExtractSignal.extract_action(prefix, signal)
 
     if action == 'cross_up':
         analysis.identify_ma_cross_up(window)
@@ -171,18 +189,19 @@ def process_ma_signals(analysis, signal, check_period_hours, recent_signals):
     if action == 'below':
         analysis.identify_ma_below(window)
 
-    column_name = f'ma{window}_{action}'
+    column_name = f'ma_{action}_{window}'
     time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
     recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
     return recent_signals
 
 def process_macd_signals(analysis, signal, check_period_hours, recent_signals):
     analysis.calculate_macd()
-    action = ExtractSignal.extract_action('macd', signal)
+    prefix = ExtractSignal.extract_prefix(signal)
+    action = ExtractSignal.extract_action(prefix, signal)
 
-    if action == 'cross_up':
+    if action == 'cross_up_signal':
         analysis.identify_macd_cross_up()
-    if action == 'cross_down':
+    if action == 'cross_down_signal':
         analysis.identify_macd_cross_down()
 
     column_name = f'macd_{action}'
@@ -193,12 +212,13 @@ def process_macd_signals(analysis, signal, check_period_hours, recent_signals):
 
 def process_bb_signals(analysis, signal, check_period_hours, recent_signals):
     analysis.calculate_bollinger_bands()
-    action = ExtractSignal.extract_action('bb', signal)
+    prefix = ExtractSignal.extract_prefix(signal)
+    action = ExtractSignal.extract_action(prefix, signal)
 
-    if action == 'upper':
-        analysis.identify_bollinger_upper()
-    if action == 'lower':
-        analysis.identify_bollinger_lower()
+    if action == 'touch_upper':
+        analysis.identify_bollinger_touch_upper()
+    if action == 'touch_lower':
+        analysis.identify_bollinger_touch_lower()
     if action == 'breakout_upper':
         analysis.identify_bollinger_breakout_upper()
     if action == 'breakout_lower':
@@ -211,12 +231,17 @@ def process_bb_signals(analysis, signal, check_period_hours, recent_signals):
 
 def process_rsi_signals(analysis, signal, check_period_hours, recent_signals):
     analysis.calculate_rsi()
-    action = ExtractSignal.extract_action('rsi', signal)
+    prefix = ExtractSignal.extract_prefix(signal)
+    action = ExtractSignal.extract_action(prefix, signal)
 
-    if action == 'overbought':
-        analysis.identify_rsi_overbought()
-    if action == 'oversold':
-        analysis.identify_rsi_oversold()
+    if action == 'gt_overbought':
+        analysis.identify_rsi_gt_overbought()
+    if action == 'lt_overbought':
+        analysis.identify_rsi_lt_overbought()
+    if action == 'lt_oversold':
+        analysis.identify_rsi_lt_oversold()
+    if action == 'gt_oversold':
+        analysis.identify_rsi_gt_oversold()
 
     column_name = f'rsi_{action}'
     time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
@@ -224,37 +249,37 @@ def process_rsi_signals(analysis, signal, check_period_hours, recent_signals):
     return recent_signals
 
 def process_price_signals(analysis, signal, check_period_hours, recent_signals):
-    window = ExtractSignal.extract_window('price', signal)
-    action = ExtractSignal.extract_action('price', signal)
+    prefix = ExtractSignal.extract_prefix(signal)
+    window = ExtractSignal.extract_window(prefix, signal)
+    action = ExtractSignal.extract_action(prefix, signal)
 
     if action == 'high_breakout':
         analysis.identify_high_breakout(window)
     if action == 'low_breakout':
         analysis.identify_low_breakout(window)
 
-    column_name = f'price{window}_{action}'
+    column_name = f'price_{action}_{window}'
     time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
     recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
     return recent_signals
 
 def process_stock_data(stock, symbols, symbols_group_industry, check_period_hours, min_data_length, signals):
     result = []
-    rsi_signals = ['rsi_overbought', 'rsi_oversold']
-    macd_signals = ['macd_cross_up', 'macd_cross_down']
-    bb_signals = ['bb_upper', 'bb_lower', 'bb_breakout_upper', 'bb_breakout_lower']
+    rsi_signals = ['rsi_gt_overbought', 'rsi_lt_overbought', 'rsi_gt_oversold', 'rsi_lt_oversold']
+    macd_signals = ['macd_cross_up_signal', 'macd_cross_down_signal']
+    bb_signals = ['bb_touch_upper', 'bb_touch_lower', 'bb_breakout_upper', 'bb_breakout_lower']
     ma_signals = [
-        'ma5_cross_up', 'ma5_cross_down', 'ma5_above', 'ma5_below',
-        'ma10_cross_up', 'ma10_cross_down', 'ma10_above', 'ma10_below',
-        'ma20_cross_up', 'ma20_cross_down', 'ma20_above', 'ma20_below',
-        'ma50_cross_up', 'ma50_cross_down', 'ma50_above', 'ma50_below',
-        'ma100_cross_up', 'ma100_cross_down', 'ma100_above', 'ma100_below',
-        'ma200_cross_up', 'ma200_cross_down', 'ma200_above', 'ma200_below',
+        'ma_cross_up_10', 'ma_cross_down_10', 'ma_above_10', 'ma_below_10',
+        'ma_cross_up_20', 'ma_cross_down_20', 'ma_above_20', 'ma_below_20',
+        'ma_cross_up_50', 'ma_cross_down_50', 'ma_above_50', 'ma_below_50',
+        'ma_cross_up_100', 'ma_cross_down_100', 'ma_above_100', 'ma_below_100',
+        'ma_cross_up_200', 'ma_cross_down_200', 'ma_above_200', 'ma_below_200',
     ]
     price_signals = [
-        'price5_high_breakout', 'price5_low_breakout',
-        'price21_high_breakout', 'price21_low_breakout',
-        'price63_high_breakout', 'price63_low_breakout',
-        'price126_high_breakout', 'price126_low_breakout',
+        'price_high_breakout_5', 'price_low_breakout_5',
+        'price_high_breakout_21', 'price_low_breakout_21',
+        'price_high_breakout_63', 'price_low_breakout_63',
+        'price_high_breakout_126', 'price_low_breakout_126',
     ]
 
     end_date = datetime.now()
@@ -364,39 +389,34 @@ def get_industries():
 # Route để lấy dữ liệu sàn
 @app.route('/groups', methods=['GET'])
 def get_groups():
-    groups = [
-        'HOSE', 'VN30', 'VNMidCap', 'VNSmallCap', 'VNAllShare', 'VN100',
-        'ETF', 'HNX', 'HNX30', 'HNXCon', 'HNXFin', 'HNXLCap', 'HNXMSCap',
-        'HNXMan', 'UPCOM', 'FU_INDEX'
-    ]
+    groups = ['HOSE', 'HNX', 'HNX30', 'VN100', 'VN30', 'VNMidCap', 'VNSmallCap', 'UPCOM']
     return jsonify(groups)
 
 # Route để lấy dữ liệu loại tín hiệu
 @app.route('/signal_categories', methods=['GET'])
 def get_signal_categories():
-    categories = ['Bollinger Band', 'MACD', 'MA', 'RSI', 'Giá']
+    categories = ['Bollinger Band (20, 2)', 'Moving Average (MA)', 'MACD (9, 12, 26)', 'RSI (14)', 'Giá']
     return jsonify(categories)
 
 # Route để lấy tên các tín hiệu dựa trên loại tín hiệu đã chọn
 @app.route('/signals/<category>', methods=['GET'])
 def get_signals(category):
     signals_map = {
-        'Bollinger Band': ['bb_upper', 'bb_lower', 'bb_breakout_upper', 'bb_breakout_lower'],
-        'MACD': ['macd_cross_up', 'macd_cross_down'],
+        'Bollinger Band': ['bb_touch_upper', 'bb_touch_lower', 'bb_breakout_upper', 'bb_breakout_lower'],
+        'MACD': ['macd_cross_up_signal', 'macd_cross_down_signal'],
         'MA': [
-            'ma5_cross_up', 'ma5_cross_down', 'ma5_above', 'ma5_below',
-            'ma10_cross_up', 'ma10_cross_down', 'ma10_above', 'ma10_below',
-            'ma20_cross_up', 'ma20_cross_down', 'ma20_above', 'ma20_below',
-            'ma50_cross_up', 'ma50_cross_down', 'ma50_above', 'ma50_below',
-            'ma100_cross_up', 'ma100_cross_down', 'ma100_above', 'ma100_below',
-            'ma200_cross_up', 'ma200_cross_down', 'ma200_above', 'ma200_below',
+            'ma_cross_up_10', 'ma_cross_down_10', 'ma_above_10', 'ma_below_10',
+            'ma_cross_up_20', 'ma_cross_down_20', 'ma_above_20', 'ma_below_20',
+            'ma_cross_up_50', 'ma_cross_down_50', 'ma_above_50', 'ma_below_50',
+            'ma_cross_up_100', 'ma_cross_down_100', 'ma_above_100', 'ma_below_100',
+            'ma_cross_up_200', 'ma_cross_down_200', 'ma_above_200', 'ma_below_200',
         ], 
-        'RSI': ['rsi_overbought', 'rsi_oversold'],
+        'RSI': ['rsi_gt_overbought', 'rsi_lt_overbought', 'rsi_gt_oversold', 'rsi_lt_oversold'],
         'Giá': [
-            'price5_high_breakout', 'price5_low_breakout',
-            'price21_high_breakout', 'price21_low_breakout',
-            'price63_high_breakout', 'price63_low_breakout',
-            'price126_high_breakout', 'price126_low_breakout'
+            'price_high_breakout_5', 'price_low_breakout_5',
+            'price_high_breakout_21', 'price_low_breakout_21',
+            'price_high_breakout_63', 'price_low_breakout_63',
+            'price_high_breakout_126', 'price_low_breakout_126'
         ]
     }
     signals = signals_map.get(category, [])
@@ -432,43 +452,3 @@ def stocks():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-# {'Bia và đồ uống',
-#  'Bán lẻ',
-#  'Bảo hiểm nhân thọ',
-#  'Bảo hiểm phi nhân thọ',
-#  'Bất động sản',
-#  'Công nghiệp nặng',
-#  'Du lịch & Giải trí',
-#  'Dược phẩm',
-#  'Dịch vụ tài chính',
-#  'Hàng cá nhân',
-#  'Hàng công nghiệp',
-#  'Hàng gia dụng',
-#  'Hàng hóa giải trí',
-#  'Hóa chất',
-#  'Khai khoáng',
-#  'Kim loại',
-#  'Lâm nghiệp và Giấy',
-#  'Ngân hàng',
-#  'Nước & Khí đốt',
-#  'Phân phối thực phẩm & dược phẩm',
-#  'Phần mềm & Dịch vụ Máy tính',
-#  'Sản xuất & Phân phối Điện',
-#  'Sản xuất Dầu khí',
-#  'Sản xuất thực phẩm',
-#  'Thiết bị và Dịch vụ Y tế',
-#  'Thiết bị và Phần cứng',
-#  'Thiết bị, Dịch vụ và Phân phối Dầu khí',
-#  'Thuốc lá',
-#  'Truyền thông',
-#  'Tư vấn & Hỗ trợ Kinh doanh',
-#  'Viễn thông cố định',
-#  'Viễn thông di động',
-#  'Vận tải',
-#  'Xây dựng và Vật liệu',
-#  'Ô tô và phụ tùng',
-#  'Điện tử & Thiết bị điện'
-#  }
-
-# HOSE, VN30, VNMidCap, VNSmallCap, VNAllShare, VN100, ETF, HNX, HNX30, HNXCon, HNXFin, HNXLCap, HNXMSCap, HNXMan, UPCOM, FU_INDEX

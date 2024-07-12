@@ -19,6 +19,81 @@ $(document).ready(function() {
         });
     }
 
+    // Signal mappings
+    var signalMappings = {
+        'Bollinger Band (20, 2)': {
+            'part1': {
+                'Giá': 'bb',
+            },
+            'part2': {
+                'vượt ra ngoài': 'breakout',
+                'chạm dải': 'touch'
+            },
+            'part3': {
+                'biên trên': 'upper',
+                'biên dưới': 'lower',
+            }
+        },
+        'Moving Average (MA)': {
+            'part1': {
+                'Giá': 'ma',
+            },
+            'part2': {
+                'cắt lên': 'cross_up',
+                'cắt xuống': 'cross_down',
+                'nằm trên': 'above',
+                'nằm dưới': 'below',
+            },
+            'part3': {
+                'MA10': '10',
+                'MA20': '20',
+                'MA50': '50',
+                'MA100': '100',
+                'MA200': '200',
+            }
+        },
+        'MACD (9, 12, 26)': {
+            'part1': {
+                'Đường MACD': 'macd',
+            },
+            'part2': {
+                'cắt lên': 'cross_up',
+                'cắt xuống': 'cross_down',
+            },
+            'part3': {
+                'đường tín hiệu': 'signal',
+            }
+        },
+        'RSI (14)': {
+            'part1': {
+                'Giá trị RSI': 'rsi',
+            },
+            'part2': {
+                'lớn hơn': 'gt',
+                'nhỏ hơn': 'lt',
+            },
+            'part3': {
+                '30': 'oversold',
+                '70': 'overbought',
+            }
+        },
+        'Giá': {
+            'part1': {
+                'Giá': 'price',
+            },
+            'part2': {
+                'tăng vượt đỉnh': 'high_breakout',
+                'giảm thủng đáy': 'low_breakout',
+            },
+            'part3': {
+                'tuần': '5',
+                'tháng': '21',
+                'quý': '63',
+                '6 tháng': '126'
+            }
+        },
+    };
+
     // Function to populate signal categories
     function populateSignalCategories() {
         $.get('/signal_categories', function(data) {
@@ -32,76 +107,22 @@ $(document).ready(function() {
         });
     }
 
-    var signalMappings = {
-        'ma5_cross_up': 'Giá cắt lên đường MA5',
-        'ma5_cross_down': 'Giá cắt xuống đường MA5',
-
-        'ma5_above': 'Giá nằm trên đường MA5',
-        'ma5_below': 'Giá nằm dưới đường MA5',
-
-        'ma10_cross_up': 'Giá cắt lên đường MA10',
-        'ma10_cross_down': 'Giá cắt xuống đường MA10',
-
-        'ma10_above': 'Giá nằm trên đường MA10',
-        'ma10_below': 'Giá nằm dưới đường MA10',
-
-        'ma20_cross_up': 'Giá cắt lên đường MA20',
-        'ma20_cross_down': 'Giá cắt xuống đường MA20',
-
-        'ma20_above': 'Giá nằm trên đường MA20',
-        'ma20_below': 'Giá nằm dưới đường MA20',
-
-        'ma50_cross_up': 'Giá cắt lên đường MA50',
-        'ma50_cross_down': 'Giá cắt xuống đường MA500',
-
-        'ma50_above': 'Giá nằm trên đường MA50',
-        'ma50_below': 'Giá nằm dưới đường MA50',
-
-        'ma100_cross_up': 'Giá cắt lên đường MA100',
-        'ma100_cross_down': 'Giá cắt xuống đường MA100',
-
-        'ma100_above': 'Giá nằm trên đường MA100',
-        'ma100_below': 'Giá nằm dưới đường MA100',
-
-        'ma200_cross_up': 'Giá cắt lên đường MA200',
-        'ma200_cross_down': 'Giá cắt xuống đường MA200',
-
-        'ma200_above': 'Giá nằm trên đường MA200',
-        'ma200_below': 'Giá nằm dưới đường MA200',
-
-        'macd_cross_up': 'Đường MACD cắt lên đường tín hiệu',
-        'macd_cross_down': 'Đường MACD cắt xuống đường tín hiệu',
-
-        'bb_breakout_upper': 'Giá vượt ra ngoài biên trên',
-        'bb_breakout_lower': 'Giá vượt ra ngoài biên dưới',
-
-        'bb_upper': 'Giá chạm dải biên trên',
-        'bb_lower': 'Giá chạm dải biên dưới',
-
-        'rsi_overbought': 'RSI >= 70',
-        'rsi_oversold': 'RSI <= 30',
-
-        'price5_high_breakout': 'Các mã có giá vượt đỉnh tuần',
-        'price5_low_breakout': 'Các mã có giá thủng đáy tuần',
-
-        'price21_high_breakout': 'Các mã có giá vượt đỉnh tháng',
-        'price21_low_breakout': 'Các mã có giá thủng đáy tháng',
-
-        'price63_high_breakout': 'Các mã có giá vượt đỉnh quý',
-        'price63_low_breakout': 'Các mã có giá thủng đáy quý',
-        
-        'price126_high_breakout': 'Các mã có giá vượt đỉnh 6 tháng',
-        'price126_low_breakout': 'Các mã có giá thủng đáy 6 tháng',
-    };
-
     // Function to populate signals based on selected category
     function populateSignals(category) {
-        $.get(`/signals/${category}`, function(data) {
-            var options = data.map(function(signal) {
-                return `<option value="${signal}">${signalMappings[signal]}</option>`;
-            });
-            $('#signalSelect').html(options.join(''));
+        var signalParts = signalMappings[category] || {};
+        var part1Options = Object.keys(signalParts.part1 || {}).map(function(key) {
+            return `<option value="${signalParts.part1[key]}">${key}</option>`;
         });
+        var part2Options = Object.keys(signalParts.part2 || {}).map(function(key) {
+            return `<option value="${signalParts.part2[key]}">${key}</option>`;
+        });
+        var part3Options = Object.keys(signalParts.part3 || {}).map(function(key) {
+            return `<option value="${signalParts.part3[key]}">${key}</option>`;
+        });
+
+        $('#signalSelect1').html(part1Options.join(''));
+        $('#signalSelect2').html(part2Options.join(''));
+        $('#signalSelect3').html(part3Options.join(''));
     }
 
     // Event listener for signal category selection
@@ -120,19 +141,32 @@ $(document).ready(function() {
 
     // Event listener for adding selected signal
     $('#addSignalButton').click(function() {
-        var selectedSignal = $('#signalSelect').val();
-        if (selectedSignal) {
-            var listItem = `<li class="list-group-item">${signalMappings[selectedSignal]} <button class="btn btn-sm btn-danger float-right remove-signal" data-signal="${selectedSignal}">x</button></li>`;
+        var selectedSignal1 = $('#signalSelect1').val();
+        var selectedSignal2 = $('#signalSelect2').val();
+        var selectedSignal3 = $('#signalSelect3').val();
+        if (selectedSignal1 && selectedSignal2 && selectedSignal3) {
+            var displaySignal1 = $('#signalSelect1 option:selected').text();
+            var displaySignal2 = $('#signalSelect2 option:selected').text();
+            var displaySignal3 = $('#signalSelect3 option:selected').text();
+            
+            // Combine the signal parts correctly
+            var combinedSignal = selectedSignal1;
+            if (selectedSignal2) {
+                combinedSignal += `_${selectedSignal2}`;
+            }
+            if (selectedSignal3) {
+                combinedSignal += `_${selectedSignal3}`;
+            }
+
+            var listItem = `<li class="list-group-item" data-signal="${combinedSignal}">${displaySignal1} ${displaySignal2} ${displaySignal3} <button class="btn btn-sm btn-danger float-right remove-signal">x</button></li>`;
             $('#selectedSignals').append(listItem);
             selectedSignalsCount++; // Tăng số lượng tín hiệu đã chọn
             updateSelectedSignalsCount(); // Cập nhật hiển thị số lượng
         }
     });
 
-
     // Event listener for removing selected signal
     $('#selectedSignals').on('click', '.remove-signal', function() {
-        var signalToRemove = $(this).data('signal');
         $(this).parent().remove();
         selectedSignalsCount--; // Giảm số lượng tín hiệu đã chọn
         updateSelectedSignalsCount(); // Cập nhật hiển thị số lượng
@@ -143,7 +177,7 @@ $(document).ready(function() {
         var industry = $('#industrySelect').val();
         var group = $('#groupSelect').val();
         var signal = $('#selectedSignals li').map(function() {
-            return $(this).find('button').data('signal');
+            return $(this).data('signal');
         }).get();
 
         // Build query string for signals

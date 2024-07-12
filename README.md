@@ -2,7 +2,7 @@
 
 - Request API:
 ```
-curl --location --request GET 'http://127.0.0.1:5000/stocks?signal=ma5_above&group=UPCOM&industry=Kim loại'
+curl --location --request GET 'http://127.0.0.1:5000/stocks?signal=ma_above_10&group=UPCOM&industry=Kim loại'
 ```
 - Response API:
 ```

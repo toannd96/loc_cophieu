@@ -21,6 +21,14 @@ h4 {
     padding-left: 10px;
 }
 
+.custom-hr {
+    border: 0;
+    height: 1px;
+    background: #1b1b1b;
+    background-image: linear-gradient(to right, #ccc, #fff, #ccc);
+    margin: 20px 0;
+}
+
 /* Style for selected signals list */
 #selectedSignals {
     list-style-type: none;
