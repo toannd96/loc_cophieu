@@ -42,9 +42,9 @@ h4 {
 }
 
 /* Style for results table */
-#resultsTable {
+/* #resultsTable {
     margin-top: 20px;
-}
+} */
 
 /* Adjust input and button alignment */
 #filterHours, #addSignalButton {
@@ -57,4 +57,12 @@ h4 {
         padding-right: 0;
         padding-left: 0;
     }
+}
+
+/* Style for the results table container */
+#resultsTable {
+    width: 100%;
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
 }

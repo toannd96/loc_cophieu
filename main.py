@@ -331,41 +331,6 @@ def process_stock_data(stock, symbols, symbols_group_industry, check_period_hour
 
     return result
 
-def paginate_results(results, page, limit):
-    total = len(results)
-    if total == 0:
-        return [], {
-            "page": page,
-            "limit": limit,
-            "from": 0,
-            "to": 0,
-            "total": 0,
-            "total_page": 0
-        }
-
-    total_page = (total + limit - 1) // limit
-
-    if page > total_page:
-        page = total_page
-    elif page < 1:
-        page = 1
-
-    from_ = (page - 1) * limit
-    to = from_ + limit
-
-    paginated_results = results[from_:to]
-
-    paging_info = {
-        "page": page,
-        "limit": limit,
-        "from": from_ + 1,
-        "to": to if to < total else total,
-        "total": total,
-        "total_page": total_page
-    }
-
-    return paginated_results, paging_info
-
 # Route để hiển thị trang chính
 @app.route('/')
 def index():
@@ -405,25 +370,7 @@ def get_signal_categories():
 # Route để lấy tên các tín hiệu dựa trên loại tín hiệu đã chọn
 @app.route('/signals/<category>', methods=['GET'])
 def get_signals(category):
-    signals_map = {
-        'Bollinger Band': ['bb_touch_upper', 'bb_touch_lower', 'bb_breakout_upper', 'bb_breakout_lower'],
-        'MACD': ['macd_cross_up_signal', 'macd_cross_down_signal'],
-        'MA': [
-            'ma_cross_up_10', 'ma_cross_down_10', 'ma_above_10', 'ma_below_10',
-            'ma_cross_up_20', 'ma_cross_down_20', 'ma_above_20', 'ma_below_20',
-            'ma_cross_up_50', 'ma_cross_down_50', 'ma_above_50', 'ma_below_50',
-            'ma_cross_up_100', 'ma_cross_down_100', 'ma_above_100', 'ma_below_100',
-            'ma_cross_up_200', 'ma_cross_down_200', 'ma_above_200', 'ma_below_200',
-        ], 
-        'RSI': ['rsi_gt_overbought', 'rsi_lt_overbought', 'rsi_gt_oversold', 'rsi_lt_oversold'],
-        'Giá': [
-            'price_high_breakout_5', 'price_low_breakout_5',
-            'price_high_breakout_21', 'price_low_breakout_21',
-            'price_high_breakout_63', 'price_low_breakout_63',
-            'price_high_breakout_126', 'price_low_breakout_126'
-        ]
-    }
-    signals = signals_map.get(category, [])
+    signals = signals_map.get(category, {})
     return jsonify(signals)
 
 # Route để lọc cổ phiếu dựa trên các tín hiệu đã chọn
@@ -443,15 +390,11 @@ def stocks():
 
     check_period_hours = 24
     min_data_length = 200
-    all_results = process_stock_data(stock, symbols, symbols_group_industry, check_period_hours, min_data_length, signals)
-
-    page = int(request.args.get('page', 1))
-    limit = int(request.args.get('limit', 100))
-    paginated_results, paging_info = paginate_results(all_results, page, limit)
+    results = process_stock_data(stock, symbols, symbols_group_industry, check_period_hours, min_data_length, signals)
 
     return jsonify({
-        "results": paginated_results,
-        "paging": paging_info
+        "results": results,
+        "total": len(results)
     })
 
 if __name__ == '__main__':

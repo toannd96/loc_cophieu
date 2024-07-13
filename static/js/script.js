@@ -129,7 +129,7 @@ $(document).ready(function() {
             method: 'GET',
             data: queryString,
             success: function(response) {
-                var total = response.paging.total;
+                var total = response.total;
                 $('#companyCount').html(`Tìm thấy <strong>${total}</strong> công ty phù hợp`);
     
                 var rows = response.results.map(function(result) {

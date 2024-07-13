@@ -53,6 +53,7 @@
         <div class="row mt-4">
             <div class="col-12">
                 <h4 id="selectedSignalsHeader">Tín hiệu đã chọn (0)</h4>
+                <div class="row mt-4"></div>
                 <ul id="selectedSignals" class="list-group">
                     <!-- Selected signals will be dynamically added here -->
                 </ul>
@@ -76,20 +77,22 @@
         </div>
         <div class="row mt-4">
             <div class="col-12">
-                <table id="resultsTable" class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Mã</th>
-                            <th>Công ty</th>
-                            <th>Ngành</th>
-                            <th>Giá đóng cửa</th>
-                            <th>KLGD</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Search results will be dynamically added here -->
-                    </tbody>
-                </table>
+                <div style="overflow-y: auto; max-height: 400px;">
+                    <table id="resultsTable" class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Công ty</th>
+                                <th>Ngành</th>
+                                <th>Giá đóng cửa</th>
+                                <th>KLGD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Search results will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
