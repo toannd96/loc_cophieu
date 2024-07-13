@@ -225,6 +225,23 @@ $(document).ready(function() {
         });
     });
 
+    // Function to get the current year
+    function getCurrentYear() {
+        return new Date().getFullYear();
+    }
+
+    // Create the footer note with the current year
+    var footerNote = `
+    <p class="text-muted">
+        Dữ liệu được truy xuất từ <a href="https://vnstocks.com/" target="_blank">Vnstock</a> - gói phần mềm Python phân tích thị trường chứng khoán Việt Nam. 
+        (thinh-vu @ Github, Copyright (c) 2022-${getCurrentYear()}).
+        <br></br>
+        Dữ liệu bộ lọc được thống kê từ các tín hiệu kỹ thuật phát sinh trong vòng 24 giờ, tính đến thời điểm giao dịch cuối cùng gần nhất.
+    </p>`;
+
+    // Append the footer note to the div with id "footerNote"
+    $('#footerNote').html(footerNote);
+
     // Initial population on page load
     populateIndustryDropdown();
     populateGroupDropdown();
