@@ -1,4 +1,4 @@
-![](https://github.com/toannd96/loc_cophieu/blob/master/static/img/loc_cophieu.png)
+![](https://github.com/toannd96/loc_cophieu/blob/master/static/img/loc_co_phieu.png)
 
 - Request API:
 ```
