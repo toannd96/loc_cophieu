@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
+# Mở tệp JSON với mã hóa UTF-8
+with open('signals_config.json', encoding='utf-8') as f:
+    signals_map = json.load(f)
+
 # Phân tích dữ liệu chứng khoán
 class StockAnalysis:
     def __init__(self, data):

@@ -19,81 +19,6 @@ $(document).ready(function() {
         });
     }
 
-    // Signal mappings
-    var signalMappings = {
-        'Bollinger Band (20, 2)': {
-            'part1': {
-                'Giá': 'bb',
-            },
-            'part2': {
-                'vượt ra ngoài': 'breakout',
-                'chạm dải': 'touch'
-            },
-            'part3': {
-                'biên trên': 'upper',
-                'biên dưới': 'lower',
-            }
-        },
-        'Moving Average (MA)': {
-            'part1': {
-                'Giá': 'ma',
-            },
-            'part2': {
-                'cắt lên': 'cross_up',
-                'cắt xuống': 'cross_down',
-                'nằm trên': 'above',
-                'nằm dưới': 'below',
-            },
-            'part3': {
-                'MA10': '10',
-                'MA20': '20',
-                'MA50': '50',
-                'MA100': '100',
-                'MA200': '200',
-            }
-        },
-        'MACD (9, 12, 26)': {
-            'part1': {
-                'Đường MACD': 'macd',
-            },
-            'part2': {
-                'cắt lên': 'cross_up',
-                'cắt xuống': 'cross_down',
-            },
-            'part3': {
-                'đường tín hiệu': 'signal',
-            }
-        },
-        'RSI (14)': {
-            'part1': {
-                'Giá trị RSI': 'rsi',
-            },
-            'part2': {
-                'lớn hơn': 'gt',
-                'nhỏ hơn': 'lt',
-            },
-            'part3': {
-                '30': 'oversold',
-                '70': 'overbought',
-            }
-        },
-        'Giá': {
-            'part1': {
-                'Giá': 'price',
-            },
-            'part2': {
-                'tăng vượt đỉnh': 'high_breakout',
-                'giảm thủng đáy': 'low_breakout',
-            },
-            'part3': {
-                'tuần': '5',
-                'tháng': '21',
-                'quý': '63',
-                '6 tháng': '126'
-            }
-        },
-    };
-
     // Function to populate signal categories
     function populateSignalCategories() {
         $.get('/signal_categories', function(data) {
@@ -109,20 +34,28 @@ $(document).ready(function() {
 
     // Function to populate signals based on selected category
     function populateSignals(category) {
-        var signalParts = signalMappings[category] || {};
-        var part1Options = Object.keys(signalParts.part1 || {}).map(function(key) {
-            return `<option value="${signalParts.part1[key]}">${key}</option>`;
+        $.ajax({
+            url: `/signals/${category}`,
+            method: 'GET',
+            success: function(data) {
+                var part1Options = Object.keys(data.part1 || {}).map(function(key) {
+                    return `<option value="${data.part1[key]}">${key}</option>`;
+                });
+                var part2Options = Object.keys(data.part2 || {}).map(function(key) {
+                    return `<option value="${data.part2[key]}">${key}</option>`;
+                });
+                var part3Options = Object.keys(data.part3 || {}).map(function(key) {
+                    return `<option value="${data.part3[key]}">${key}</option>`;
+                });
+    
+                $('#signalSelect1').html(part1Options.join(''));
+                $('#signalSelect2').html(part2Options.join(''));
+                $('#signalSelect3').html(part3Options.join(''));
+            },
+            error: function(error) {
+                console.log('Error fetching signals:', error);
+            }
         });
-        var part2Options = Object.keys(signalParts.part2 || {}).map(function(key) {
-            return `<option value="${signalParts.part2[key]}">${key}</option>`;
-        });
-        var part3Options = Object.keys(signalParts.part3 || {}).map(function(key) {
-            return `<option value="${signalParts.part3[key]}">${key}</option>`;
-        });
-
-        $('#signalSelect1').html(part1Options.join(''));
-        $('#signalSelect2').html(part2Options.join(''));
-        $('#signalSelect3').html(part3Options.join(''));
     }
 
     // Event listener for signal category selection
