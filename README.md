@@ -7,14 +7,6 @@ curl --location --request GET 'http://127.0.0.1:5000/stocks?signal=ma_above_10&g
 - Response API:
 ```
 {
-    "paging": {
-        "from": 1,
-        "limit": 100,
-        "page": 1,
-        "to": 2,
-        "total": 2,
-        "total_page": 1
-    },
     "results": [
         {
             "close_price": 2.1,
@@ -32,7 +24,8 @@ curl --location --request GET 'http://127.0.0.1:5000/stocks?signal=ma_above_10&g
             "symbol": "CBI",
             "volume": 100
         }
-    ]
+    ],
+    "total": 2
 } 
 ```
 - Cài đặt:
