@@ -1,10 +1,5 @@
 /* Styles for custom stock filter interface */
 
-/* Center align headings */
-h4 {
-    text-align: center;
-}
-
 /* Margin for the container */
 .container {
     margin-top: 30px;
@@ -41,11 +36,6 @@ h4 {
     margin-top: 20px;
 }
 
-/* Style for results table */
-/* #resultsTable {
-    margin-top: 20px;
-} */
-
 /* Adjust input and button alignment */
 #filterHours, #addSignalButton {
     margin-top: 30px;
@@ -59,10 +49,18 @@ h4 {
     }
 }
 
-/* Style for the results table container */
+/* Style for results table */
 #resultsTable {
-    width: 100%;
     margin-top: 20px;
-    max-height: 400px;
-    overflow-y: auto;
+}
+
+#resultsTable thead tr {
+    text-align: center;
+    position: sticky;
+    top: 0px;
+    background: #E5F2EE;
+}
+
+#resultsTable tbody {
+    text-align: center;
 }

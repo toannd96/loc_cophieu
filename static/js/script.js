@@ -91,7 +91,7 @@ $(document).ready(function() {
                 combinedSignal += `_${selectedSignal3}`;
             }
 
-            var listItem = `<li class="list-group-item" data-signal="${combinedSignal}">${displaySignal1} ${displaySignal2} ${displaySignal3} <button class="btn btn-sm btn-danger float-right remove-signal">x</button></li>`;
+            var listItem = `<li class="list-group-item" data-signal="${combinedSignal}">${displaySignal1} ${displaySignal2} ${displaySignal3} <button class="btn btn-sm btn-danger float-right remove-signal" data-toggle="tooltip" title="Bỏ chọn tín hiệu">x</button></li>`;
             $('#selectedSignals').append(listItem);
             selectedSignalsCount++; // Tăng số lượng tín hiệu đã chọn
             updateSelectedSignalsCount(); // Cập nhật hiển thị số lượng
@@ -165,7 +165,7 @@ $(document).ready(function() {
 
     // Create the footer note with the current year
     var footerNote = `
-    <p class="text-muted">
+    <p class="text-muted small">
         Dữ liệu được truy xuất từ <a href="https://vnstocks.com/" target="_blank">Vnstock</a> - gói phần mềm Python phân tích thị trường chứng khoán Việt Nam. 
         (thinh-vu @ Github, Copyright (c) 2022-${getCurrentYear()}).
         <br></br>
