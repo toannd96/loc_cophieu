@@ -24,10 +24,43 @@
     margin: 20px 0;
 }
 
-/* Style for selected signals list */
-#selectedSignals {
-    list-style-type: none;
-    padding-left: 0;
+/* Style cho danh sách tín hiệu đã chọn */
+#selectedSignalsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#selectedSignalsContainer .list-group-item {
+    flex-basis: calc(33.33% - 10px);
+    max-width: calc(33.33% - 10px);
+    word-wrap: break-word;
+    text-align: center;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px; /* Điều chỉnh kích thước font nếu cần */
+}
+
+#selectedSignalsContainer .list-group-item .remove-signal {
+    color: #fff; /* Màu chữ của nút "x" */
+    background-color: #6c757d; /* Màu xám */
+    border: none;
+    padding: 0; /* Không padding để canh chữ "x" ở giữa */
+    border-radius: 5px; /* Bo tròn các góc */
+    font-size: 14px; /* Kích thước chữ "x" nhỏ hơn */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+/* Hiệu ứng hover cho nút "x" */
+#selectedSignalsContainer .list-group-item .remove-signal:hover {
+    background-color: #5a6268; /* Màu xám đậm hơn khi hover */
+    cursor: pointer;
 }
 
 /* Style for search button */
@@ -37,7 +70,7 @@
 }
 
 /* Adjust input and button alignment */
-#filterHours, #addSignalButton {
+#addSignalButton {
     margin-top: 30px;
 }
 
@@ -46,6 +79,11 @@
     .col-md-6, .col-md-5, .col-md-1 {
         padding-right: 0;
         padding-left: 0;
+    }
+
+    #selectedSignalsContainer .list-group-item {
+        flex-basis: calc(50% - 10px);
+        max-width: calc(50% - 10px);
     }
 }
 

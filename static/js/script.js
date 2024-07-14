@@ -67,8 +67,12 @@ $(document).ready(function() {
     // Biến để lưu số lượng tín hiệu đã chọn
     var selectedSignalsCount = 0;
 
+    // Biến để lưu các tín hiệu đã chọn
+    var selectedSignals = {};
+
     // Function để cập nhật số lượng tín hiệu đã chọn
     function updateSelectedSignalsCount() {
+        selectedSignalsCount = Object.keys(selectedSignals).length;
         $('#selectedSignalsHeader').text(`Tín hiệu đã chọn (${selectedSignalsCount})`);
     }
 
@@ -77,39 +81,46 @@ $(document).ready(function() {
         var selectedSignal1 = $('#signalSelect1').val();
         var selectedSignal2 = $('#signalSelect2').val();
         var selectedSignal3 = $('#signalSelect3').val();
-        if (selectedSignal1 && selectedSignal2 && selectedSignal3) {
-            var displaySignal1 = $('#signalSelect1 option:selected').text();
-            var displaySignal2 = $('#signalSelect2 option:selected').text();
-            var displaySignal3 = $('#signalSelect3 option:selected').text();
-            
-            // Combine the signal parts correctly
-            var combinedSignal = selectedSignal1;
-            if (selectedSignal2) {
-                combinedSignal += `_${selectedSignal2}`;
-            }
-            if (selectedSignal3) {
-                combinedSignal += `_${selectedSignal3}`;
-            }
 
-            var listItem = `<li class="list-group-item" data-signal="${combinedSignal}">${displaySignal1} ${displaySignal2} ${displaySignal3} <button class="btn btn-sm btn-danger float-right remove-signal" data-toggle="tooltip" title="Bỏ chọn tín hiệu">x</button></li>`;
-            $('#selectedSignals').append(listItem);
-            selectedSignalsCount++; // Tăng số lượng tín hiệu đã chọn
-            updateSelectedSignalsCount(); // Cập nhật hiển thị số lượng
+        // Kiểm tra tín hiệu đã được chọn trước đó
+        var combinedSignal = [selectedSignal1, selectedSignal2, selectedSignal3].filter(Boolean).join('_');
+        if (selectedSignals[combinedSignal]) {
+            alert('Tín hiệu này đã được chọn trước đó.');
+            return;
         }
+
+        // Thêm tín hiệu vào danh sách đã chọn
+        selectedSignals[combinedSignal] = true;
+
+        // Hiển thị tín hiệu đã chọn trên giao diện
+        var displaySignals = [$('#signalSelect1 option:selected').text(), $('#signalSelect2 option:selected').text(), $('#signalSelect3 option:selected').text()].filter(Boolean).join(' ');
+        var listItem = `<li class="list-group-item" data-signal="${combinedSignal}">${displaySignals} <button class="btn btn-sm btn-danger float-right remove-signal" data-toggle="tooltip" title="Bỏ chọn tín hiệu">x</button></li>`;
+        $('#selectedSignalsContainer').append(listItem);
+
+        // Cập nhật số lượng tín hiệu đã chọn
+        updateSelectedSignalsCount();
     });
 
     // Event listener for removing selected signal
-    $('#selectedSignals').on('click', '.remove-signal', function() {
-        $(this).parent().remove();
-        selectedSignalsCount--; // Giảm số lượng tín hiệu đã chọn
-        updateSelectedSignalsCount(); // Cập nhật hiển thị số lượng
+    $('#selectedSignalsContainer').on('click', '.remove-signal', function() {
+        var listItem = $(this).parent();
+        var signalToRemove = listItem.data('signal');
+
+        // Xóa tín hiệu khỏi danh sách đã chọn
+        delete selectedSignals[signalToRemove];
+
+        // Xóa khỏi giao diện
+        listItem.remove();
+
+        // Cập nhật số lượng tín hiệu đã chọn
+        updateSelectedSignalsCount();
     });
 
     // Event listener for search button click
     $('#searchButton').click(function() {
         var industry = $('#industrySelect').val();
         var group = $('#groupSelect').val();
-        var signal = $('#selectedSignals li').map(function() {
+        var signal = $('#selectedSignalsContainer li').map(function() {
             return $(this).data('signal');
         }).get();
 
