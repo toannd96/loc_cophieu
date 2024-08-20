@@ -195,7 +195,11 @@ def process_ma_signals(analysis, signal, check_period_hours, recent_signals):
 
     column_name = f'ma_{action}_{window}'
     time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
-    recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
+    condition = (analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)
+    if not recent_signals.empty:
+        recent_signals = recent_signals.reset_index(drop=True)
+    recent_signals = analysis.data[condition] if recent_signals.empty else recent_signals[recent_signals.index.isin(analysis.data[condition].index)]
+    
     return recent_signals
 
 def process_macd_signals(analysis, signal, check_period_hours, recent_signals):
@@ -210,7 +214,10 @@ def process_macd_signals(analysis, signal, check_period_hours, recent_signals):
 
     column_name = f'macd_{action}'
     time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
-    recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
+    condition = (analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)
+    if not recent_signals.empty:
+        recent_signals = recent_signals.reset_index(drop=True)
+    recent_signals = analysis.data[condition] if recent_signals.empty else recent_signals[recent_signals.index.isin(analysis.data[condition].index)]
     
     return recent_signals
 
@@ -230,7 +237,11 @@ def process_bb_signals(analysis, signal, check_period_hours, recent_signals):
 
     column_name = f'bb_{action}'
     time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
-    recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
+    condition = (analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)
+    if not recent_signals.empty:
+        recent_signals = recent_signals.reset_index(drop=True)
+    recent_signals = analysis.data[condition] if recent_signals.empty else recent_signals[recent_signals.index.isin(analysis.data[condition].index)]
+    
     return recent_signals
 
 def process_rsi_signals(analysis, signal, check_period_hours, recent_signals):
@@ -249,7 +260,11 @@ def process_rsi_signals(analysis, signal, check_period_hours, recent_signals):
 
     column_name = f'rsi_{action}'
     time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
-    recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
+    condition = (analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)
+    if not recent_signals.empty:
+        recent_signals = recent_signals.reset_index(drop=True)
+    recent_signals = analysis.data[condition] if recent_signals.empty else recent_signals[recent_signals.index.isin(analysis.data[condition].index)]
+    
     return recent_signals
 
 def process_price_signals(analysis, signal, check_period_hours, recent_signals):
@@ -264,7 +279,11 @@ def process_price_signals(analysis, signal, check_period_hours, recent_signals):
 
     column_name = f'price_{action}_{window}'
     time_check_period_ago = analysis.data['time'].iloc[-1] - timedelta(hours=check_period_hours)
-    recent_signals = pd.concat([recent_signals, analysis.data[(analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)]], ignore_index=True)
+    condition = (analysis.data[column_name]) & (analysis.data['time'] >= time_check_period_ago)
+    if not recent_signals.empty:
+        recent_signals = recent_signals.reset_index(drop=True)
+    recent_signals = analysis.data[condition] if recent_signals.empty else recent_signals[recent_signals.index.isin(analysis.data[condition].index)]
+    
     return recent_signals
 
 def process_stock_data(stock, symbols, symbols_group_industry, check_period_hours, min_data_length, signals):
